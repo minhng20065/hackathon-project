@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Phishing Detector - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #111827;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #1f2937;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+            border: 1px solid #374151;
+        }
+
+        .header {
+            background: #111827;
+            padding: 40px 30px;
+            text-align: center;
+            border-bottom: 1px solid #374151;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .shield-icon {
+            width: 40px;
+            height: 40px;
+            color: #22d3ee;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #22d3ee, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: #9ca3af;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e5e7eb;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: #111827;
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+            font-size: 16px;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #22d3ee;
+            box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1);
+        }
+
+        textarea {
+            height: 140px;
+            resize: vertical;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: #6b7280;
+        }
+
+        .btn {
+            background: #0891b2;
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: #06b6d4;
+            transform: translateY(-1px);
+        }
+
+        .result-container {
+            padding: 30px;
+            border-top: 1px solid #374151;
+        }
+
+        .result-box {
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid;
+            transition: all 0.3s;
+        }
+
+        .safe {
+            background: rgba(6, 95, 70, 0.2);
+            border-color: rgba(4, 120, 87, 0.5);
+        }
+
+        .phishing {
+            background: rgba(153, 27, 27, 0.2);
+            border-color: rgba(185, 28, 28, 0.5);
+        }
+
+        .score-bar {
+            height: 20px;
+            background: #374151;
+            border-radius: 10px;
+            margin: 16px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #ef4444);
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .score-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.875em;
+            color: #9ca3af;
+        }
+
+        .details {
+            background: #111827;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #374151;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #374151;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .risk-high {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        .risk-medium {
+            color: #f59e0b;
+            font-weight: bold;
+        }
+
+        .risk-low {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid #374151;
+            border-top: 4px solid #22d3ee;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .verdict-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 16px;
+        }
+
+        .safe .verdict-icon {
+            color: #10b981;
+        }
+
+        .phishing .verdict-icon {
+            color: #ef4444;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .result-title {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .safe .result-title {
+            color: #10b981;
+        }
+
+        .phishing .result-title {
+            color: #ef4444;
+        }
+
+        .demo-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .demo-btn {
+            flex: 1;
+            padding: 10px;
+            background: #374151;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .demo-btn:hover {
+            background: #4b5563;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <svg class="shield-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                <h1>AI Phishing Detector</h1>
+            </div>
+            <p>Advanced email analysis using spellcheck, URL inspection, and content analysis</p>
+        </div>
+
+        <div class="form-container">
+            <form id="phishingForm">
+                <div class="form-group">
+                    <label for="senderEmail">Sender Email Address</label>
+                    <input type="email" id="senderEmail" placeholder="e.g., security@paypal-security.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="emailSubject">Email Subject</label>
+                    <input type="text" id="emailSubject" placeholder="e.g., Urgent: Verify Your Account Now!" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="emailBody">Email Body</label>
+                    <textarea id="emailBody" placeholder="Paste the email content here..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn" id="analyzeBtn">
+                    <span>Analyze Email</span>
+                </button>
+
+                <div class="demo-buttons">
+                    <button type="button" class="demo-btn" onclick="loadPhishingExample()">Load Phishing Example</button>
+                    <button type="button" class="demo-btn" onclick="loadSafeExample()">Load Safe Example</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="color: #9ca3af;">Analyzing email content...</p>
+        </div>
+
+        <div class="result-container hidden" id="resultContainer">
+            <div class="result-box" id="resultBox">
+                <div class="result-header">
+                    <svg class="verdict-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="verdictIcon">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h2 class="result-title" id="resultTitle">Analysis Result</h2>
+                </div>
+                
+                <div class="score-bar">
+                    <div class="score-fill" id="scoreFill"></div>
+                </div>
+                <div class="score-labels">
+                    <span>Safe (0)</span>
+                    <span id="phishingScore">0</span>
+                    <span>Phishing (100)</span>
+                </div>
+                
+                <div class="details">
+                    <h4 style="margin-bottom: 16px; color: #e5e7eb;">Detection Analysis</h4>
+                    <div id="analysisDetails"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Example emails for demo
+        const phishingExample = {
+            sender: "security@paypal-security.com",
+            subject: "URGENT: Verify Your Account Immediately!",
+            body: `Dear Valued Customer,
+
+We have detected suspicious activity on your PayPal account. Your account will be SUSPENDED within 24 hours if you do not verify your information.
+
+Please CLICK the link below immediately to verify your account details:
+http://paypal-security-verification.com/secure-login
+
+This is required to protect your account from unauthorized access. Failure to verify will result in permanent account termination.
+
+Thank you,
+PayPal Security Team`
+        };
+
+        const safeExample = {
+            sender: "newsletter@company.com",
+            subject: "Your Monthly Newsletter",
+            body: `Hello valued customer,
+
+Here's your monthly newsletter with updates about our services and upcoming features.
+
+We've added new security measures to protect your account. You can review your account settings at any time by logging into our official website.
+
+If you have any questions, please don't hesitate to contact our support team.
+
+Best regards,
+The Company Team`
+        };
+
+        function loadPhishingExample() {
+            document.getElementById('senderEmail').value = phishingExample.sender;
+            document.getElementById('emailSubject').value = phishingExample.subject;
+            document.getElementById('emailBody').value = phishingExample.body;
+        }
+
+        function loadSafeExample() {
+            document.getElementById('senderEmail').value = safeExample.sender;
+            document.getElementById('emailSubject').value = safeExample.subject;
+            document.getElementById('emailBody').value = safeExample.body;
+        }
+
+        // Load phishing example by default
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPhishingExample();
+        });
+
+        document.getElementById('phishingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const senderEmail = document.getElementById('senderEmail').value;
+            const emailSubject = document.getElementById('emailSubject').value;
+            const emailBody = document.getElementById('emailBody').value;
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultContainer').classList.add('hidden');
+
+            // Simulate analysis delay
+            setTimeout(() => {
+                const analysis = analyzeEmail(senderEmail, emailSubject, emailBody);
+                document.getElementById('loading').style.display = 'none';
+                displayResults(analysis);
+            }, 1500);
+        });
+
+        function analyzeEmail(senderEmail, subject, body) {
+            let score = 0;
+            const details = [];
+
+            // 1. Email Domain Analysis
+            const suspiciousDomains = ['.ru', '.tk', '.ml', '.ga', '.cf', '.xyz', '.top'];
+            const hasSuspiciousDomain = suspiciousDomains.some(domain => senderEmail.includes(domain));
+            if (hasSuspiciousDomain) {
+                score += 25;
+                details.push({ factor: 'Suspicious Domain', risk: 'High', points: 25, icon: '🚨' });
+            }
+
+            // 2. Urgency Keywords
+            const urgencyKeywords = ['urgent', 'immediately', 'asap', 'verify', 'confirm', 'security alert'];
+            const urgencyCount = urgencyKeywords.filter(word => 
+                subject.toLowerCase().includes(word) || body.toLowerCase().includes(word)
+            ).length;
+            if (urgencyCount > 0) {
+                score += Math.min(urgencyCount * 8, 20);
+                details.push({ factor: `Urgency Keywords (${urgencyCount})`, risk: 'Medium', points: Math.min(urgencyCount * 8, 20), icon: '⚠️' });
+            }
+
+            // 3. Request Keywords
+            const requestKeywords = ['click', 'link', 'password', 'account', 'login', 'verify', 'suspend'];
+            const requestCount = requestKeywords.filter(word => body.toLowerCase().includes(word)).length;
+            if (requestCount > 0) {
+                score += Math.min(requestCount * 7, 25);
+                details.push({ factor: `Suspicious Requests (${requestCount})`, risk: 'High', points: Math.min(requestCount * 7, 25), icon: '🔗' });
+            }
+
+            // 4. URL Analysis
+            const urlCount = (body.match(/https?:\/\/[^\s]+/g) || []).length;
+            if (urlCount > 0) {
+                score += Math.min(urlCount * 10, 20);
+                details.push({ factor: `Suspicious URLs (${urlCount})`, risk: 'High', points: Math.min(urlCount * 10, 20), icon: '🌐' });
+            }
+
+            // 5. Threat Language
+            const threatKeywords = ['suspend', 'close', 'terminate', 'locked', 'expire'];
+            const threatCount = threatKeywords.filter(word => body.toLowerCase().includes(word)).length;
+            if (threatCount > 0) {
+                score += Math.min(threatCount * 6, 15);
+                details.push({ factor: `Threat Language (${threatCount})`, risk: 'Medium', points: Math.min(threatCount * 6, 15), icon: '🔒' });
+            }
+
+            // 6. Spelling Errors (simulated)
+            const commonErrors = ['clik', 'verif', 'secur', 'passord', 'acount'];
+            const errorCount = commonErrors.filter(error => body.toLowerCase().includes(error)).length;
+            if (errorCount > 0) {
+                score += Math.min(errorCount * 5, 10);
+                details.push({ factor: `Spelling Errors (${errorCount})`, risk: 'Medium', points: Math.min(errorCount * 5, 10), icon: '✏️' });
+            }
+
+            return {
+                score: Math.min(score, 100),
+                isPhishing: score > 60,
+                details: details
+            };
+        }
+
+        function displayResults(analysis) {
+            const resultBox = document.getElementById('resultBox');
+            const verdictIcon = document.getElementById('verdictIcon');
+            const resultTitle = document.getElementById('resultTitle');
+            const scoreFill = document.getElementById('scoreFill');
+            const phishingScore = document.getElementById('phishingScore');
+            const analysisDetails = document.getElementById('analysisDetails');
+
+            // Update score
+            phishingScore.textContent = analysis.score;
+            scoreFill.style.width = analysis.score + '%';
+
+            if (analysis.isPhishing) {
+                resultBox.className = 'result-box phishing';
+                resultTitle.textContent = '🚨 PHISHING DETECTED';
+                verdictIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+            } else {
+                resultBox.className = 'result-box safe';
+                resultTitle.textContent = '✅ EMAIL APPEARS SAFE';
+                verdictIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+            }
+
+            // Build details HTML
+            analysisDetails.innerHTML = analysis.details.map(detail => `
+                <div class="detail-item">
+                    <div>
+                        <span style="margin-right: 8px;">${detail.icon}</span>
+                        <span>${detail.factor}</span>
+                    </div>
+                    <span class="risk-${detail.risk.toLowerCase()}">${detail.risk} (+${detail.points})</span>
+                </div>
+            `).join('');
+
+            // Show results
+            document.getElementById('resultContainer').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
