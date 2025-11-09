@@ -1,5 +1,4 @@
 import pandas as pd
-# print("test")
 
 CEAS_08 = pd.read_csv("hackathon-project/CEAS_08.csv")
 Nigerian_Fraud = pd.read_csv("hackathon-project/Nigerian_Fraud.csv")
@@ -20,7 +19,7 @@ print(CEAS_08.columns)
 # pd.reset_option("display.max_columns")
 # pd.reset_option("display.max_colwidth")
 
-enron_data = pd.read_csv("enron_data_fraud_labeled.csv", usecols = ["From", "Subject", "X-From", "Body", "Label", "To"])
+enron_data = pd.read_csv("hackathon-project/enron_data_fraud_labeled.csv", usecols = ["From", "Subject", "X-From", "Body", "Label", "To"])
 # print(enron_data.head().T)
 # enron_data = enron_data.drop(columns = ["Folder-User", "Folder-Name", "Message-ID", "Date", "To", "Mime-Version", "Content-Type", "Content-Transfer-Encoding", "X-To", "X-cc", "X-bcc", "X-Folder", "X-Origin", "X-FileName", "Cc", "Bcc", "Time", "Attendees", "Re", "Source", "Mail-ID", "POI-Present", "Suspicious-Folders", "Sender-Type", "Unique-Mails-From-Sender", "Low-Comm", "Contains-Reply-Forwards"])
 #Kept: From, Subject, X-From, Body, Label
