@@ -107,7 +107,7 @@ def train(model, iterator, optimizer, criterion):
         epoch_acc += acc.item()
     return epoch_loss / len(iterator), epoch_acc / len(iterator)
 
-N_EPOCHS = 5
+N_EPOCHS = 50
 for epoch in range(N_EPOCHS):
     train_loss, train_acc = train(model, train_iterator, optimizer, criterion)
     print(f'Epoch: {epoch+1.02}, Train Loss:{train_loss:.3f}, Train Acc: {train_acc*100:.2f}%')
