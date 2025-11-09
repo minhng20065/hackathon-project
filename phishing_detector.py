@@ -11,7 +11,8 @@ import tldextract
 class NonMLPhishingDetector:
     def __init__(self):
         self.spell = SpellChecker()
-        self.tool = language_tool_python.LanguageTool('en-US')
+        with language_tool_python.LanguageTool('en-US') as tool:
+            self.tool = tool
     
     #Spellcheck and language analysis: 
     def check_spelling_errors(self, text):
