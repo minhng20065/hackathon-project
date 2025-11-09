@@ -1,5 +1,3 @@
-import numpy as np
-import torch
 import pandas as pd
 # print("test")
 
@@ -65,3 +63,14 @@ megaDataset = pd.concat(datasets)
 print(megaDataset.T)
 # print(f"shape: {megaDataset.shape}")
 # print("Why is the columns in 'megaDataset.T' and 'megaDataset.shape' different? Maybe if theres not enough memory allocation available. I just restarted the terminal and VS Code")
+
+df = pd.read_csv("enron_data_fraud_labeled.csv")
+
+keep_columns = ["From", "Subject", "Body", "Label"]
+df = df[keep_columns]
+
+df_clean = df.dropna()
+
+print(df_clean.head())
+
+df_clean.to_csv("phishing_training_data.csv", index=False)
