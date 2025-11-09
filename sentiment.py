@@ -12,7 +12,7 @@ URGENCY_KEYWORDS = [
 
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 URGENCY_KEYWORDS_SET = set(URGENCY_KEYWORDS)
-print(f"Processing {len(CEAS_08)} items...")
+print(f"Processing {len(CEAS_08)} items....")
 start_time = time.time()
 
 # Use tqdm for progress bar
